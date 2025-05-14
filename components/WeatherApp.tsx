@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ScrollView, Image } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Button,
+  ActivityIndicator,
+} from 'react-native';
+
+import CitySearch from './CitySearch';
 import Weather from './Weather';
-import styles from './WeatherStyles';
-
-
 const WeatherApp = () => {
   const [activeTab, setActiveTab] = useState<'today' | '3days' | '5days' | null>(null);
   const [city, setCity] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<any>(null);
 
   const fetchWeather = async (cityName: string) => {
     setLoading(true);
@@ -21,8 +28,10 @@ const WeatherApp = () => {
         `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${apiKey}&units=metric&lang=ru`
       );
 
-      if (!response.ok){
+      if (!response.ok) {
         setData(null);
+        setError('Город не найден');
+        throw new Error('Город не найден');
       }
 
       const weatherData = await response.json();
@@ -37,45 +46,52 @@ const WeatherApp = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Image style={styles.logo} source={require('../assets/logo.png')} />
+        <Image
+          source={{ uri: 'https://cdn-icons-png.flaticon.com/512/1163/1163660.png' }}
+          style={styles.logo}
+        />
 
         <View style={styles.nav}>
-          <Button
-            title="Сегодня"
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'today' && styles.activeTab]}
             onPress={() => setActiveTab('today')}
-            color={activeTab === 'today' ? 'blue' : 'gray'}
-          />
-          <Button
-            title="На 3 дня"
+          >
+            <Text style={styles.tabText}>Сегодня</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.tab, activeTab === '3days' && styles.activeTab]}
             onPress={() => setActiveTab('3days')}
-            color={activeTab === '3days' ? 'blue' : 'gray'}
-          />
-          <Button
-            title="На 5 дней"
+          >
+            <Text style={styles.tabText}>На 3 дня</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.tab, activeTab === '5days' && styles.activeTab]}
             onPress={() => setActiveTab('5days')}
-            color={activeTab === '5days' ? 'blue' : 'gray'}
-          />
+          >
+            <Text style={styles.tabText}>На 5 дней</Text>
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.search}>
-          <TextInput
-            style={styles.input}
-            placeholder="Введите город"
-            value={city}
-            onChangeText={setCity}
-            onSubmitEditing={() => fetchWeather(city)}
-          />
-          <Button title="Найти" onPress={() => fetchWeather(city)} />
-        </View>
+        <CitySearch
+          onCitySelect={(selectedCity) => {
+            setCity(selectedCity);
+            fetchWeather(selectedCity);
+          }}
+        />
+
+        <Button title="Найти" onPress={() => fetchWeather(city)} />
       </View>
-
-      <ScrollView contentContainerStyle={styles.content}>
+      <View style={styles.content}>
         {!city || !activeTab ? (
-          <Text>Выберите город и период на который хотите посмотреть прогноз погоды</Text>
+          <Text style={styles.prompt}>
+            Выберите город и период на который хотите посмотреть прогноз погоды
+          </Text>
         ) : (
           <>
-            {loading && <Text>Загрузка...</Text>}
-            {error && <Text style={styles.errorText}>{error}</Text>}
+            {loading && <ActivityIndicator size="large" color="#0000ff" />}
+            {error !== '' && <Text style={styles.error}>{error}</Text>}
             {data && (
               <>
                 {activeTab === 'today' && <Weather city={city} forecastDays={1} />}
@@ -85,10 +101,59 @@ const WeatherApp = () => {
             )}
           </>
         )}
-      </ScrollView>
+      </View>
     </View>
   );
 };
 
-
 export default WeatherApp;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 10,
+    backgroundColor: '#eef6ff',
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    marginTop: 30,
+    marginBottom: 15,
+  },
+  nav: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  tab: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#ddd',
+    marginHorizontal: 5,
+    borderRadius: 5,
+  },
+  activeTab: {
+    backgroundColor: '#007bff',
+  },
+  tabText: {
+    color: '#fff',
+  },
+  content: {
+    flex: 1,
+    marginTop: 20,
+  },
+  prompt: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#333',
+  },
+  error: {
+    color: 'red',
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+});

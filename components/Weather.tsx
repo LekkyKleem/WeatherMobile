@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, } from 'react-native';
+import { View, Text, Image, ScrollView } from 'react-native';
 import styles from './WeatherStyles';
 import { LinearGradient } from 'react-native-linear-gradient';
 
@@ -31,7 +31,7 @@ type ForecastData = {
 // Пропс для компонента Weather (передает город и кол-во дней прогноза)
 type WeatherProps = {
   city: string;
-  forecastDays?: number; 
+  forecastDays?: number;
 };
 
 // Функция для правильного склонения слова "день"
@@ -61,7 +61,7 @@ const Weather = ({ city, forecastDays = 1 }: WeatherProps) => {
         `https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&appid=${apiKey}&units=metric&lang=ru`
       );
 
-      if (!response.ok){
+      if (!response.ok) {
         setForecast([]);
         throw new Error('Ошибка при получении данных о погоде');
       }
@@ -92,7 +92,8 @@ const Weather = ({ city, forecastDays = 1 }: WeatherProps) => {
       {loading && <Text>Загрузка...</Text>}
       {error && <Text style={styles.errorText}>{error}</Text>}
 
-      <View style={styles.forecastCards}>
+      {/* Добавляем ScrollView для прокрутки прогноза */}
+      <ScrollView contentContainerStyle={styles.forecastCards}>
         {forecast.length === 0 ? (
           <Text>Нет данных для отображения</Text>
         ) : (
@@ -113,7 +114,7 @@ const Weather = ({ city, forecastDays = 1 }: WeatherProps) => {
             </View>
           ))
         )}
-      </View>
+      </ScrollView>
     </View>
   );
 };
