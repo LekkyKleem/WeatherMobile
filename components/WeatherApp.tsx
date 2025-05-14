@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ScrollView } from 'react-native';
-import Weather from './Weather'; // Импорт компонента Weather
+import { View, Text, TextInput, Button, StyleSheet, ScrollView, Image } from 'react-native';
+import Weather from './Weather';
+import styles from './WeatherStyles';
+
 
 const WeatherApp = () => {
   const [activeTab, setActiveTab] = useState<'today' | '3days' | '5days' | null>(null);
@@ -19,7 +21,9 @@ const WeatherApp = () => {
         `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${apiKey}&units=metric&lang=ru`
       );
 
-      if (!response.ok) throw new Error('Город не найден');
+      if (!response.ok){
+        setData(null);
+      }
 
       const weatherData = await response.json();
       setData(weatherData);
@@ -33,8 +37,8 @@ const WeatherApp = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.logo}>🌤️</Text> {/* Логотип погоды, можно заменить на изображение */}
-        
+        <Image style={styles.logo} source={require('../assets/logo.png')} />
+
         <View style={styles.nav}>
           <Button
             title="Сегодня"
@@ -86,43 +90,5 @@ const WeatherApp = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  logo: {
-    fontSize: 50,
-    marginBottom: 10,
-  },
-  nav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 20,
-  },
-  search: {
-    width: '100%',
-    marginBottom: 20,
-  },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingLeft: 10,
-    marginBottom: 10,
-  },
-  content: {
-    alignItems: 'center',
-  },
-  errorText: {
-    color: 'red',
-  },
-});
 
 export default WeatherApp;

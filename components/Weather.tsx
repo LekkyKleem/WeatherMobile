@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, } from 'react-native';
+import styles from './WeatherStyles';
+import { LinearGradient } from 'react-native-linear-gradient';
 
 // Типизация данных
 type ForecastData = {
@@ -29,7 +31,7 @@ type ForecastData = {
 // Пропс для компонента Weather (передает город и кол-во дней прогноза)
 type WeatherProps = {
   city: string;
-  forecastDays?: number; // Число дней для прогноза
+  forecastDays?: number; 
 };
 
 // Функция для правильного склонения слова "день"
@@ -59,7 +61,10 @@ const Weather = ({ city, forecastDays = 1 }: WeatherProps) => {
         `https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&appid=${apiKey}&units=metric&lang=ru`
       );
 
-      if (!response.ok) throw new Error('Город не найден');
+      if (!response.ok){
+        setForecast([]);
+        throw new Error('Ошибка при получении данных о погоде');
+      }
 
       const forecastData = await response.json();
       const filteredForecast = forecastData.list.filter(
@@ -112,35 +117,5 @@ const Weather = ({ city, forecastDays = 1 }: WeatherProps) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  weather: {
-    padding: 20,
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  errorText: {
-    color: 'red',
-  },
-  forecastCards: {
-    marginTop: 10,
-  },
-  forecastCard: {
-    marginBottom: 20,
-  },
-  date: {
-    fontSize: 18,
-  },
-  icon: {
-    width: 50,
-    height: 50,
-  },
-  bold: {
-    fontWeight: 'bold',
-  },
-});
 
 export default Weather;
