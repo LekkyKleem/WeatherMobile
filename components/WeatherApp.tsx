@@ -29,6 +29,7 @@ const WeatherApp = () => {
       );
 
       if (!response.ok) {
+        setData(null);
         setError('Город не найден');
         throw new Error('Город не найден');
       }
@@ -92,7 +93,7 @@ const WeatherApp = () => {
           <>
             {loading && <ActivityIndicator size="large" color="#0000ff" />}
             {error !== '' && <Text style={styles.error}>{error}</Text>}
-            {data && !error && (
+            {data && (
               <>
                 {activeTab === 'today' && <Weather city={city} forecastDays={1} />}
                 {activeTab === '3days' && <Weather city={city} forecastDays={3} />}
